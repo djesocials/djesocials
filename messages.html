@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJEsocials - Messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .messages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 100px);
+        }
+
+        .conversations-list {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            animation: fadeInLeft 0.6s ease-out;
+        }
+
+        .conversations-list h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(30, 30, 36, 0.4);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .conversation-item:hover,
+        .conversation-item.active {
+            background: rgba(123, 63, 242, 0.2);
+            border-color: var(--accent-purple);
+            transform: translateX(5px);
+        }
+
+        .conversation-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .conversation-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .conversation-preview {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-area {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeInRight 0.6s ease-out;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(123, 63, 242, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .chat-header-info h3 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .chat-header-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bubble.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bubble.received {
+            align-self: flex-start;
+            background: rgba(58, 58, 68, 0.8);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-text {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(123, 63, 242, 0.2);
+            display: flex;
+            gap: 12px;
+        }
+
+        .message-input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(30, 30, 36, 0.6);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .message-input-area input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            background: rgba(30, 30, 36, 0.8);
+        }
+
+        .send-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(123, 63, 242, 0.4);
+        }
+
+        .empty-chat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-chat h3 {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        /* Scrollbar styling */
+        .conversations-list::-webkit-scrollbar,
+        .messages-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .conversations-list::-webkit-scrollbar-track,
+        .messages-area::-webkit-scrollbar-track {
+            background: rgba(30, 30, 36, 0.4);
+            border-radius: 10px;
+        }
+
+        .conversations-list::-webkit-scrollbar-thumb,
+        .messages-area::-webkit-scrollbar-thumb {
+            background: var(--accent-purple);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">DJEsocials</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="friends.html" class="nav-link">Friends</a>
+                <a href="messages.html" class="nav-link active">Messages</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="messages-container" style="padding: 20px;">
+        <!-- Conversations List -->
+        <div class="conversations-list">
+            <h2>Messages</h2>
+            <div id="conversationsList"></div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea">
+            <div class="empty-chat">
+                <div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a friend to start messaging</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="messages.js"></script>
+</body>
+</html>
