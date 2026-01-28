@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJEsocials - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">DJEsocials</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link active">Home</a>
+                <a href="friends.html" class="nav-link">Friends</a>
+                <a href="messages.html" class="nav-link">Messages</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar-left">
+            <div class="user-card">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-item">
+                    <div class="stat-number" id="friendCount">0</div>
+                    <div class="stat-label">Friends</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="postCount">0</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Feed -->
+        <main class="feed-container">
+            <!-- Create Post Box -->
+            <div class="create-post-card">
+                <div class="create-post-header">
+                    <h2>Share Something</h2>
+                </div>
+                <textarea 
+                    id="postContent" 
+                    placeholder="What's on your mind?"
+                    rows="4"
+                ></textarea>
+                <div class="create-post-actions">
+                    <div class="char-count" id="charCount">0/500</div>
+                    <button class="post-btn" onclick="createPost()">
+                        <span>Post</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="posts-feed" id="postsFeed">
+                <!-- Posts will be dynamically loaded here -->
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="sidebar-right">
+            <div class="trending-card">
+                <h3>Trending Topics</h3>
+                <div class="trending-list">
+                    <div class="trending-item">#WebDevelopment</div>
+                    <div class="trending-item">#DJEsocials</div>
+                    <div class="trending-item">#Coding</div>
+                    <div class="trending-item">#SocialMedia</div>
+                    <div class="trending-item">#TechNews</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="home.js"></script>
+</body>
+</html>
