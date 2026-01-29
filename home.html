@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJEsocials - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">DJEsocials</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link active">Home</a>
+                <a href="friends.html" class="nav-link">Friends</a>
+                <a href="messages.html" class="nav-link">Messages</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar-left">
+            <div class="user-card">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-item">
+                    <div class="stat-number" id="friendCount">0</div>
+                    <div class="stat-label">Friends</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="postCount">0</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Feed -->
+        <main class="feed-container">
+            <!-- Create Post Box -->
+            <div class="create-post-card">
+                <div class="create-post-header">
+                    <h2>Share Something</h2>
+                </div>
+                <textarea 
+                    id="postContent" 
+                    placeholder="What's on your mind?"
+                    rows="4"
+                ></textarea>
+                <div class="create-post-actions">
+                    <div class="char-count" id="charCount">0/500</div>
+                    <button class="post-btn" id="createPostBtn">
+                        <span>Post</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="posts-feed" id="postsFeed">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading posts...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="sidebar-right">
+            <div class="trending-card">
+                <h3>Trending Topics</h3>
+                <div class="trending-list">
+                    <div class="trending-item">#WebDevelopment</div>
+                    <div class="trending-item">#DJEsocials</div>
+                    <div class="trending-item">#Coding</div>
+                    <div class="trending-item">#SocialMedia</div>
+                    <div class="trending-item">#TechNews</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Firebase SDK and Home Logic -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, set, get, push, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBToS2mXevsJAEZXnvbJrF5an6Q1iH1BNk",
+            authDomain: "djesocials-e4120.firebaseapp.com",
+            databaseURL: "https://djesocials-e4120-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "djesocials-e4120",
+            storageBucket: "djesocials-e4120.firebasestorage.app",
+            messagingSenderId: "578832879687",
+            appId: "1:578832879687:web:a802f513f51016267ba162",
+            measurementId: "G-DZR1D2STQJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        let currentUser = null;
+        let currentUserData = null;
+
+        // Check authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = user;
+            await loadUserData();
+            displayUserInfo();
+            loadPosts();
+        });
+
+        // Load current user data
+        async function loadUserData() {
+            const userRef = ref(database, 'users/' + currentUser.uid);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                currentUserData = snapshot.val();
+            }
+        }
+
+        // Display user information
+        function displayUserInfo() {
+            if (!currentUserData) return;
+            
+            document.getElementById('userName').textContent = currentUserData.username;
+            document.getElementById('userEmail').textContent = currentUserData.email;
+            document.getElementById('userAvatar').textContent = currentUserData.username.charAt(0).toUpperCase();
+            
+            // Count friends and posts
+            const friendCount = currentUserData.friends ? Object.keys(currentUserData.friends).length : 0;
+            const postCount = currentUserData.posts ? Object.keys(currentUserData.posts).length : 0;
+            
+            document.getElementById('friendCount').textContent = friendCount;
+            document.getElementById('postCount').textContent = postCount;
+        }
+
+        // Character counter
+        const postContent = document.getElementById('postContent');
+        const charCount = document.getElementById('charCount');
+
+        postContent.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = `${length}/500`;
+            charCount.style.color = length > 500 ? '#ef4444' : 'var(--text-muted)';
+        });
+
+        // Create a new post
+        document.getElementById('createPostBtn').addEventListener('click', async function() {
+            const content = postContent.value.trim();
+            const btn = this;
+            
+            if (!content) {
+                alert('Post cannot be empty!');
+                return;
+            }
+            
+            if (content.length > 500) {
+                alert('Post is too long! Maximum 500 characters.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Posting...';
+            
+            try {
+                // Create post in database
+                const postsRef = ref(database, 'posts');
+                const newPostRef = push(postsRef);
+                
+                await set(newPostRef, {
+                    authorId: currentUser.uid,
+                    authorUsername: currentUserData.username,
+                    content: content,
+                    timestamp: Date.now(),
+                    likes: {},
+                    comments: {}
+                });
+
+                // Add post ID to user's posts
+                const userPostRef = ref(database, `users/${currentUser.uid}/posts/${newPostRef.key}`);
+                await set(userPostRef, true);
+                
+                // Clear input
+                postContent.value = '';
+                charCount.textContent = '0/500';
+                
+                // Update post count
+                await loadUserData();
+                displayUserInfo();
+                
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('Error creating post. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Post';
+            }
+        });
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            }
+            if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            }
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+
+        // Toggle like on a post
+        window.toggleLike = async function(postId) {
+            if (!currentUser) return;
+            
+            const likeRef = ref(database, `posts/${postId}/likes/${currentUser.uid}`);
+            const snapshot = await get(likeRef);
+            
+            if (snapshot.exists()) {
+                // Unlike
+                await remove(likeRef);
+            } else {
+                // Like
+                await set(likeRef, true);
+            }
+        };
+
+        // Toggle comments section
+        window.toggleComments = function(postId) {
+            const commentsSection = document.querySelector(`[data-post-id="${postId}"] .comments-section`);
+            commentsSection.classList.toggle('active');
+            
+            if (commentsSection.classList.contains('active')) {
+                loadComments(postId);
+            }
+        };
+
+        // Add a comment
+        window.addComment = async function(postId) {
+            const commentInput = document.querySelector(`[data-post-id="${postId}"] .comment-input input`);
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                alert('Comment cannot be empty!');
+                return;
+            }
+            
+            try {
+                const commentsRef = ref(database, `posts/${postId}/comments`);
+                const newCommentRef = push(commentsRef);
+                
+                await set(newCommentRef, {
+                    authorId: currentUser.uid,
+                    authorUsername: currentUserData.username,
+                    text: commentText,
+                    timestamp: Date.now()
+                });
+                
+                commentInput.value = '';
+                loadComments(postId);
+                
+            } catch (error) {
+                console.error('Error adding comment:', error);
+                alert('Error adding comment. Please try again.');
+            }
+        };
+
+        // Load comments for a post
+        async function loadComments(postId) {
+            const commentsRef = ref(database, `posts/${postId}/comments`);
+            const snapshot = await get(commentsRef);
+            
+            const commentsList = document.querySelector(`[data-post-id="${postId}"] .comments-list`);
+            
+            if (!snapshot.exists()) {
+                commentsList.innerHTML = '<div class="comment-item">No comments yet. Be the first to comment!</div>';
+                return;
+            }
+            
+            const comments = snapshot.val();
+            const commentsArray = Object.entries(comments).map(([id, data]) => ({ id, ...data }));
+            commentsArray.sort((a, b) => a.timestamp - b.timestamp);
+            
+            commentsList.innerHTML = commentsArray.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-author">${comment.authorUsername}</div>
+                    <div class="comment-text">${comment.text}</div>
+                </div>
+            `).join('');
+        }
+
+        // Load all posts with real-time updates
+        function loadPosts() {
+            const postsRef = ref(database, 'posts');
+            
+            onValue(postsRef, (snapshot) => {
+                const postsFeed = document.getElementById('postsFeed');
+                
+                if (!snapshot.exists()) {
+                    postsFeed.innerHTML = `
+                        <div class="post-card" style="text-align: center; padding: 40px;">
+                            <h3 style="margin-bottom: 10px;">No posts yet</h3>
+                            <p style="color: var(--text-muted);">Be the first to share something!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const posts = snapshot.val();
+                const postsArray = Object.entries(posts).map(([id, data]) => ({ id, ...data }));
+                postsArray.sort((a, b) => b.timestamp - a.timestamp);
+                
+                postsFeed.innerHTML = postsArray.map(post => {
+                    const isLiked = post.likes && post.likes[currentUser.uid];
+                    const likesCount = post.likes ? Object.keys(post.likes).length : 0;
+                    const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
+                    const avatar = post.authorUsername.charAt(0).toUpperCase();
+                    
+                    return `
+                        <div class="post-card" data-post-id="${post.id}">
+                            <div class="post-header">
+                                <div class="post-avatar">${avatar}</div>
+                                <div class="post-user-info">
+                                    <div class="post-username">${post.authorUsername}</div>
+                                    <div class="post-timestamp">${formatTimestamp(post.timestamp)}</div>
+                                </div>
+                            </div>
+                            <div class="post-content">${post.content}</div>
+                            <div class="post-actions">
+                                <button class="action-btn like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${post.id}')">
+                                    <span>❤️</span>
+                                    <span class="like-count">${likesCount}</span>
+                                </button>
+                                <button class="action-btn comment-btn" onclick="toggleComments('${post.id}')">
+                                    <span>💬</span>
+                                    <span class="comment-count">${commentsCount}</span>
+                                </button>
+                            </div>
+                            <div class="comments-section">
+                                <div class="comment-input">
+                                    <input type="text" placeholder="Write a comment..." onkeypress="if(event.key === 'Enter') addComment('${post.id}')">
+                                    <button class="comment-btn" onclick="addComment('${post.id}')">Post</button>
+                                </div>
+                                <div class="comments-list">
+                                    <!-- Comments will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJEsocials - Friends</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .friends-main {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .search-card {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .search-card h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(30, 30, 36, 0.6);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            background: rgba(30, 30, 36, 0.8);
+        }
+
+        .search-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(123, 63, 242, 0.4);
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .friends-section {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .friends-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .friend-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(30, 30, 36, 0.4);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .friend-card:hover {
+            border-color: rgba(123, 63, 242, 0.4);
+            transform: translateX(5px);
+        }
+
+        .friend-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .friend-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .friend-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .friend-username {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .friend-email {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-btn,
+        .remove-btn,
+        .message-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .add-btn:hover {
+            background: #a855f7;
+            transform: translateY(-2px);
+        }
+
+        .remove-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+        }
+
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .message-btn {
+            background: rgba(123, 63, 242, 0.2);
+            border: 1px solid rgba(123, 63, 242, 0.5);
+            color: var(--text-light);
+        }
+
+        .message-btn:hover {
+            background: rgba(123, 63, 242, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">DJEsocials</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="friends.html" class="nav-link active">Friends</a>
+                <a href="messages.html" class="nav-link">Messages</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="friends-main" style="padding: 20px;">
+        <!-- Search Section -->
+        <div class="search-card">
+            <h2>Add Friends</h2>
+            <div class="search-input-group">
+                <input type="text" id="searchInput" placeholder="Search by username...">
+                <button class="search-btn" id="searchBtn">Search</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <!-- Friends List -->
+        <div class="friends-section">
+            <h2>My Friends (<span id="friendsCount">0</span>)</h2>
+            <div id="friendsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading friends...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, get, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBToS2mXevsJAEZXnvbJrF5an6Q1iH1BNk",
+            authDomain: "djesocials-e4120.firebaseapp.com",
+            databaseURL: "https://djesocials-e4120-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "djesocials-e4120",
+            storageBucket: "djesocials-e4120.firebasestorage.app",
+            messagingSenderId: "578832879687",
+            appId: "1:578832879687:web:a802f513f51016267ba162",
+            measurementId: "G-DZR1D2STQJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        let currentUser = null;
+        let currentUserData = null;
+
+        // Check authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = user;
+            await loadUserData();
+            loadFriends();
+        });
+
+        // Load current user data
+        async function loadUserData() {
+            const userRef = ref(database, 'users/' + currentUser.uid);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                currentUserData = snapshot.val();
+            }
+        }
+
+        // Search for users
+        document.getElementById('searchBtn').addEventListener('click', async function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!searchTerm) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            
+            searchResults.innerHTML = '<div class="loading"><div class="spinner"></div><p>Searching...</p></div>';
+            
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (!snapshot.exists()) {
+                    searchResults.innerHTML = '<div class="empty-state"><h3>No users found</h3></div>';
+                    return;
+                }
+                
+                const users = snapshot.val();
+                const matchingUsers = Object.entries(users)
+                    .filter(([uid, data]) => 
+                        uid !== currentUser.uid && 
+                        data.username.toLowerCase().includes(searchTerm)
+                    )
+                    .map(([uid, data]) => ({ uid, ...data }));
+                
+                if (matchingUsers.length === 0) {
+                    searchResults.innerHTML = '<div class="empty-state"><h3>No users found</h3><p>Try searching for a different username</p></div>';
+                    return;
+                }
+                
+                displaySearchResults(matchingUsers);
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                searchResults.innerHTML = '<div class="empty-state"><h3>Error searching</h3><p>Please try again</p></div>';
+            }
+        });
+
+        // Allow search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // Display search results
+        function displaySearchResults(users) {
+            const searchResults = document.getElementById('searchResults');
+            const friends = currentUserData.friends || {};
+            
+            searchResults.innerHTML = users.map(user => {
+                const isFriend = friends[user.uid];
+                const avatar = user.username.charAt(0).toUpperCase();
+                
+                return `
+                    <div class="friend-card" style="margin-top: 15px;">
+                        <div class="friend-info">
+                            <div class="friend-avatar">${avatar}</div>
+                            <div class="friend-details">
+                                <div class="friend-username">${user.username}</div>
+                                <div class="friend-email">${user.email}</div>
+                            </div>
+                        </div>
+                        <div class="friend-actions">
+                            ${isFriend 
+                                ? `<button class="remove-btn" onclick="window.removeFriend('${user.uid}')">Remove</button>
+                                   <button class="message-btn" onclick="window.goToMessages('${user.uid}')">Message</button>`
+                                : `<button class="add-btn" onclick="window.addFriend('${user.uid}')">Add Friend</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Add a friend
+        window.addFriend = async function(friendId) {
+            try {
+                // Add friend to current user
+                const myFriendRef = ref(database, `users/${currentUser.uid}/friends/${friendId}`);
+                await set(myFriendRef, true);
+                
+                // Add current user to friend's list
+                const theirFriendRef = ref(database, `users/${friendId}/friends/${currentUser.uid}`);
+                await set(theirFriendRef, true);
+                
+                // Reload data
+                await loadUserData();
+                loadFriends();
+                
+                // Re-search to update buttons
+                document.getElementById('searchBtn').click();
+                
+                alert('Friend added successfully!');
+                
+            } catch (error) {
+                console.error('Error adding friend:', error);
+                alert('Error adding friend. Please try again.');
+            }
+        };
+
+        // Remove a friend
+        window.removeFriend = async function(friendId) {
+            if (!confirm('Are you sure you want to remove this friend?')) {
+                return;
+            }
+            
+            try {
+                // Remove friend from current user
+                const myFriendRef = ref(database, `users/${currentUser.uid}/friends/${friendId}`);
+                await remove(myFriendRef);
+                
+                // Remove current user from friend's list
+                const theirFriendRef = ref(database, `users/${friendId}/friends/${currentUser.uid}`);
+                await remove(theirFriendRef);
+                
+                // Reload data
+                await loadUserData();
+                loadFriends();
+                
+                // Re-search to update buttons if search was active
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput.value.trim()) {
+                    document.getElementById('searchBtn').click();
+                }
+                
+                alert('Friend removed successfully.');
+                
+            } catch (error) {
+                console.error('Error removing friend:', error);
+                alert('Error removing friend. Please try again.');
+            }
+        };
+
+        // Go to messages
+        window.goToMessages = function(friendId) {
+            sessionStorage.setItem('openChatWith', friendId);
+            window.location.href = 'messages.html';
+        };
+
+        // Load friends list
+        function loadFriends() {
+            const friendsList = document.getElementById('friendsList');
+            const friendsCount = document.getElementById('friendsCount');
+            const friends = currentUserData.friends || {};
+            const friendIds = Object.keys(friends);
+            
+            friendsCount.textContent = friendIds.length;
+            
+            if (friendIds.length === 0) {
+                friendsList.innerHTML = '<div class="empty-state"><h3>No friends yet</h3><p>Search for users above to add friends!</p></div>';
+                return;
+            }
+            
+            // Load each friend's data
+            Promise.all(friendIds.map(async (friendId) => {
+                const friendRef = ref(database, 'users/' + friendId);
+                const snapshot = await get(friendRef);
+                return snapshot.exists() ? { uid: friendId, ...snapshot.val() } : null;
+            })).then(friendsData => {
+                const validFriends = friendsData.filter(f => f !== null);
+                
+                friendsList.innerHTML = validFriends.map(friend => {
+                    const avatar = friend.username.charAt(0).toUpperCase();
+                    
+                    return `
+                        <div class="friend-card">
+                            <div class="friend-info">
+                                <div class="friend-avatar">${avatar}</div>
+                                <div class="friend-details">
+                                    <div class="friend-username">${friend.username}</div>
+                                    <div class="friend-email">${friend.email}</div>
+                                </div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="message-btn" onclick="window.goToMessages('${friend.uid}')">Message</button>
+                                <button class="remove-btn" onclick="window.removeFriend('${friend.uid}')">Remove</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

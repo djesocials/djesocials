@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJEsocials - Messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .messages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 100px);
+            padding: 20px;
+        }
+
+        .conversations-list {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            animation: fadeInLeft 0.6s ease-out;
+        }
+
+        .conversations-list h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(30, 30, 36, 0.4);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .conversation-item:hover,
+        .conversation-item.active {
+            background: rgba(123, 63, 242, 0.2);
+            border-color: var(--accent-purple);
+            transform: translateX(5px);
+        }
+
+        .conversation-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .conversation-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .conversation-preview {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-area {
+            background: rgba(42, 42, 50, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeInRight 0.6s ease-out;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(123, 63, 242, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .chat-header-info h3 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        .chat-header-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bubble.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bubble.received {
+            align-self: flex-start;
+            background: rgba(58, 58, 68, 0.8);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-text {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(123, 63, 242, 0.2);
+            display: flex;
+            gap: 12px;
+        }
+
+        .message-input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(30, 30, 36, 0.6);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .message-input-area input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            background: rgba(30, 30, 36, 0.8);
+        }
+
+        .send-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(123, 63, 242, 0.4);
+        }
+
+        .empty-chat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-chat h3 {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .conversations-list::-webkit-scrollbar,
+        .messages-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .conversations-list::-webkit-scrollbar-track,
+        .messages-area::-webkit-scrollbar-track {
+            background: rgba(30, 30, 36, 0.4);
+            border-radius: 10px;
+        }
+
+        .conversations-list::-webkit-scrollbar-thumb,
+        .messages-area::-webkit-scrollbar-thumb {
+            background: var(--accent-purple);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">DJEsocials</div>
+            <div class="nav-links">
+                <a href="home.html" class="nav-link">Home</a>
+                <a href="friends.html" class="nav-link">Friends</a>
+                <a href="messages.html" class="nav-link active">Messages</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="messages-container">
+        <!-- Conversations List -->
+        <div class="conversations-list">
+            <h2>Messages</h2>
+            <div id="conversationsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea">
+            <div class="empty-chat">
+                <div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a friend to start messaging</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, get, set, push, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBToS2mXevsJAEZXnvbJrF5an6Q1iH1BNk",
+            authDomain: "djesocials-e4120.firebaseapp.com",
+            databaseURL: "https://djesocials-e4120-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "djesocials-e4120",
+            storageBucket: "djesocials-e4120.firebasestorage.app",
+            messagingSenderId: "578832879687",
+            appId: "1:578832879687:web:a802f513f51016267ba162",
+            measurementId: "G-DZR1D2STQJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        let currentUser = null;
+        let currentUserData = null;
+        let activeChat = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = user;
+            await loadUserData();
+            loadConversations();
+            
+            // Check if should open specific chat
+            const openChatWith = sessionStorage.getItem('openChatWith');
+            if (openChatWith) {
+                sessionStorage.removeItem('openChatWith');
+                openChat(openChatWith);
+            }
+        });
+
+        async function loadUserData() {
+            const userRef = ref(database, 'users/' + currentUser.uid);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                currentUserData = snapshot.val();
+            }
+        }
+
+        function getConversationKey(uid1, uid2) {
+            return [uid1, uid2].sort().join('_');
+        }
+
+        function loadConversations() {
+            const conversationsList = document.getElementById('conversationsList');
+            const friends = currentUserData.friends || {};
+            const friendIds = Object.keys(friends);
+            
+            if (friendIds.length === 0) {
+                conversationsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);"><p>No friends to message</p><p style="font-size: 13px; margin-top: 10px;">Add friends to start chatting!</p></div>';
+                return;
+            }
+            
+            Promise.all(friendIds.map(async (friendId) => {
+                const friendRef = ref(database, 'users/' + friendId);
+                const snapshot = await get(friendRef);
+                if (!snapshot.exists()) return null;
+                
+                const friendData = snapshot.val();
+                const convKey = getConversationKey(currentUser.uid, friendId);
+                const messagesRef = ref(database, 'conversations/' + convKey);
+                const messagesSnapshot = await get(messagesRef);
+                
+                let lastMessage = 'Start a conversation';
+                if (messagesSnapshot.exists()) {
+                    const messages = Object.values(messagesSnapshot.val());
+                    const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+                    if (sorted[0]) {
+                        lastMessage = sorted[0].text;
+                    }
+                }
+                
+                return {
+                    uid: friendId,
+                    username: friendData.username,
+                    lastMessage: lastMessage
+                };
+            })).then(conversations => {
+                const validConvs = conversations.filter(c => c !== null);
+                
+                conversationsList.innerHTML = validConvs.map(conv => {
+                    const avatar = conv.username.charAt(0).toUpperCase();
+                    const isActive = activeChat === conv.uid;
+                    
+                    return `
+                        <div class="conversation-item ${isActive ? 'active' : ''}" onclick="window.openChat('${conv.uid}')">
+                            <div class="conversation-avatar">${avatar}</div>
+                            <div class="conversation-info">
+                                <div class="conversation-name">${conv.username}</div>
+                                <div class="conversation-preview">${conv.lastMessage.substring(0, 30)}${conv.lastMessage.length > 30 ? '...' : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+        }
+
+        window.openChat = async function(friendId) {
+            activeChat = friendId;
+            
+            const friendRef = ref(database, 'users/' + friendId);
+            const snapshot = await get(friendRef);
+            if (!snapshot.exists()) return;
+            
+            const friendData = snapshot.val();
+            const avatar = friendData.username.charAt(0).toUpperCase();
+            const chatArea = document.getElementById('chatArea');
+            
+            chatArea.innerHTML = `
+                <div class="chat-header">
+                    <div class="chat-header-avatar">${avatar}</div>
+                    <div class="chat-header-info">
+                        <h3>${friendData.username}</h3>
+                        <p>${friendData.email}</p>
+                    </div>
+                </div>
+                <div class="messages-area" id="messagesArea"></div>
+                <div class="message-input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message...">
+                    <button class="send-btn" id="sendBtn">Send</button>
+                </div>
+            `;
+            
+            loadConversations();
+            loadMessages(friendId);
+            
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+            
+            document.getElementById('sendBtn').addEventListener('click', sendMessage);
+            document.getElementById('messageInput').focus();
+        };
+
+        function loadMessages(friendId) {
+            const convKey = getConversationKey(currentUser.uid, friendId);
+            const messagesRef = ref(database, 'conversations/' + convKey);
+            
+            onValue(messagesRef, (snapshot) => {
+                const messagesArea = document.getElementById('messagesArea');
+                
+                if (!snapshot.exists()) {
+                    messagesArea.innerHTML = '<div style="text-align: center; color: var(--text-muted); margin: auto;"><p>No messages yet</p><p style="font-size: 13px; margin-top: 10px;">Send a message to start!</p></div>';
+                    return;
+                }
+                
+                const messages = Object.values(snapshot.val());
+                messages.sort((a, b) => a.timestamp - b.timestamp);
+                
+                messagesArea.innerHTML = messages.map(msg => {
+                    const isSent = msg.senderId === currentUser.uid;
+                    const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    
+                    return `
+                        <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+                            <div class="message-text">${msg.text}</div>
+                            <div class="message-time">${time}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            });
+        }
+
+        async function sendMessage() {
+            if (!activeChat) return;
+            
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) return;
+            
+            const convKey = getConversationKey(currentUser.uid, activeChat);
+            const messagesRef = ref(database, 'conversations/' + convKey);
+            const newMessageRef = push(messagesRef);
+            
+            await set(newMessageRef, {
+                senderId: currentUser.uid,
+                receiverId: activeChat,
+                text: messageText,
+                timestamp: Date.now()
+            });
+            
+            messageInput.value = '';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            if (confirm('Are you sure you want to logout?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
