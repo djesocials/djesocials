@@ -284,6 +284,45 @@
             display: none;
         }
 
+        #phoneForm,
+        #emailLinkForm {
+            display: none;
+        }
+
+        .alt-btn {
+            width: 100%;
+            padding: 14px;
+            background: rgba(30, 30, 36, 0.8);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alt-btn:hover {
+            background: rgba(30, 30, 36, 1);
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .google-btn:hover {
+            background: rgba(66, 133, 244, 0.1);
+            border-color: #4285F4;
+        }
+
+        #recaptcha-container {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+        }
+
         .loading {
             text-align: center;
             padding: 20px;
@@ -331,8 +370,73 @@
                 <input type="password" id="loginPassword" placeholder="Enter your password" required>
             </div>
             <button type="submit" class="btn" id="loginBtn">Sign In</button>
+            
+            <!-- Divider -->
+            <div style="text-align: center; margin: 25px 0; color: var(--text-muted); font-size: 14px;">
+                <span style="display: inline-block; position: relative;">
+                    <span style="background: rgba(42, 42, 50, 0.8); padding: 0 10px; position: relative; z-index: 1;">Or sign in with</span>
+                    <span style="position: absolute; top: 50%; left: -100px; right: -100px; height: 1px; background: rgba(123, 63, 242, 0.2);"></span>
+                </span>
+            </div>
+            
+            <!-- Alternative Sign-in Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <button type="button" class="alt-btn google-btn" id="googleSignInBtn">
+                    <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right: 10px;">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707 0-.593.102-1.17.282-1.709V4.958H.957C.347 6.173 0 7.548 0 9c0 1.452.348 2.827.957 4.042l3.007-2.335z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                
+                <button type="button" class="alt-btn email-link-btn" id="emailLinkBtn">
+                    <span style="margin-right: 10px; font-size: 18px;">📧</span>
+                    Sign in with Email Link
+                </button>
+                
+                <button type="button" class="alt-btn phone-btn" id="phoneSignInBtn">
+                    <span style="margin-right: 10px; font-size: 18px;">📱</span>
+                    Sign in with Phone
+                </button>
+            </div>
+            
             <div class="toggle-text">
                 Don't have an account? <a class="toggle-link" onclick="toggleForms()">Sign Up</a>
+            </div>
+        </form>
+
+        <!-- Phone Sign-in Form (Hidden) -->
+        <form id="phoneForm" style="display: none;">
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="tel" id="phoneNumber" placeholder="+1234567890" required>
+                <small style="color: var(--text-muted); font-size: 12px; margin-top: 5px; display: block;">Include country code (e.g., +1 for US)</small>
+            </div>
+            <div id="recaptcha-container"></div>
+            <button type="submit" class="btn" id="sendCodeBtn">Send Code</button>
+            
+            <div class="form-group" id="verificationCodeGroup" style="display: none; margin-top: 20px;">
+                <label for="verificationCode">Verification Code</label>
+                <input type="text" id="verificationCode" placeholder="Enter 6-digit code">
+            </div>
+            <button type="button" class="btn" id="verifyCodeBtn" style="display: none; margin-top: 10px;">Verify Code</button>
+            
+            <div class="toggle-text">
+                <a class="toggle-link" onclick="backToLogin()">Back to Login</a>
+            </div>
+        </form>
+
+        <!-- Email Link Form (Hidden) -->
+        <form id="emailLinkForm" style="display: none;">
+            <div class="form-group">
+                <label for="emailLinkInput">Email Address</label>
+                <input type="email" id="emailLinkInput" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" class="btn" id="sendLinkBtn">Send Sign-in Link</button>
+            <div class="toggle-text">
+                <a class="toggle-link" onclick="backToLogin()">Back to Login</a>
             </div>
         </form>
 
@@ -361,7 +465,7 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getDatabase, ref, set, get, child, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         // Firebase configuration
@@ -551,6 +655,219 @@
                 window.location.href = 'home.html';
             }
         });
+
+        // Google Sign-In
+        document.getElementById('googleSignInBtn').addEventListener('click', async function() {
+            const provider = new GoogleAuthProvider();
+            
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Check if user data exists in database
+                const userRef = ref(database, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                
+                if (!snapshot.exists()) {
+                    // Create user data for first-time Google sign-in
+                    const username = user.displayName || user.email.split('@')[0];
+                    await set(userRef, {
+                        username: username,
+                        email: user.email,
+                        createdAt: new Date().toISOString(),
+                        friends: {},
+                        posts: {},
+                        authMethod: 'google'
+                    });
+                }
+                
+                showSuccess('Signed in with Google! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                showError('Google sign-in failed. Please try again.');
+            }
+        });
+
+        // Phone Sign-In Setup
+        let confirmationResult;
+        
+        window.backToLogin = function() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('phoneForm').style.display = 'none';
+            document.getElementById('emailLinkForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'none';
+        };
+
+        document.getElementById('phoneSignInBtn').addEventListener('click', function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('phoneForm').style.display = 'block';
+            
+            // Setup reCAPTCHA
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'normal',
+                    'callback': (response) => {
+                        console.log('reCAPTCHA solved');
+                    }
+                });
+                window.recaptchaVerifier.render();
+            }
+        });
+
+        // Send Phone Verification Code
+        document.getElementById('phoneForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const appVerifier = window.recaptchaVerifier;
+            const sendCodeBtn = document.getElementById('sendCodeBtn');
+            
+            sendCodeBtn.disabled = true;
+            sendCodeBtn.textContent = 'Sending Code...';
+            
+            try {
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                
+                showSuccess('Verification code sent to your phone!');
+                document.getElementById('verificationCodeGroup').style.display = 'block';
+                document.getElementById('verifyCodeBtn').style.display = 'block';
+                sendCodeBtn.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Phone verification error:', error);
+                showError('Failed to send code. Check phone number format (+1234567890)');
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = 'Send Code';
+            }
+        });
+
+        // Verify Phone Code
+        document.getElementById('verifyCodeBtn').addEventListener('click', async function() {
+            const code = document.getElementById('verificationCode').value;
+            const verifyBtn = this;
+            
+            if (!code) {
+                showError('Please enter verification code');
+                return;
+            }
+            
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+            
+            try {
+                const result = await confirmationResult.confirm(code);
+                const user = result.user;
+                
+                // Check if user data exists
+                const userRef = ref(database, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                
+                if (!snapshot.exists()) {
+                    // Create user data for first-time phone sign-in
+                    const username = user.phoneNumber.replace(/[^0-9]/g, '').slice(-4);
+                    await set(userRef, {
+                        username: `User${username}`,
+                        email: user.email || `${user.phoneNumber}@phone.user`,
+                        phoneNumber: user.phoneNumber,
+                        createdAt: new Date().toISOString(),
+                        friends: {},
+                        posts: {},
+                        authMethod: 'phone'
+                    });
+                }
+                
+                showSuccess('Phone verified! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Code verification error:', error);
+                showError('Invalid verification code. Please try again.');
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify Code';
+            }
+        });
+
+        // Email Link Sign-In
+        document.getElementById('emailLinkBtn').addEventListener('click', function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('emailLinkForm').style.display = 'block';
+        });
+
+        document.getElementById('emailLinkForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('emailLinkInput').value;
+            const sendLinkBtn = document.getElementById('sendLinkBtn');
+            
+            sendLinkBtn.disabled = true;
+            sendLinkBtn.textContent = 'Sending Link...';
+            
+            const actionCodeSettings = {
+                url: window.location.href,
+                handleCodeInApp: true
+            };
+            
+            try {
+                await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+                window.localStorage.setItem('emailForSignIn', email);
+                
+                showSuccess('Sign-in link sent to your email! Check your inbox.');
+                sendLinkBtn.disabled = false;
+                sendLinkBtn.textContent = 'Send Sign-in Link';
+                
+            } catch (error) {
+                console.error('Email link error:', error);
+                showError('Failed to send email link. Please try again.');
+                sendLinkBtn.disabled = false;
+                sendLinkBtn.textContent = 'Send Sign-in Link';
+            }
+        });
+
+        // Handle Email Link Sign-In (when user clicks link in email)
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn');
+            if (!email) {
+                email = window.prompt('Please provide your email for confirmation');
+            }
+            
+            signInWithEmailLink(auth, email, window.location.href)
+                .then(async (result) => {
+                    window.localStorage.removeItem('emailForSignIn');
+                    const user = result.user;
+                    
+                    // Check if user data exists
+                    const userRef = ref(database, 'users/' + user.uid);
+                    const snapshot = await get(userRef);
+                    
+                    if (!snapshot.exists()) {
+                        // Create user data for first-time email link sign-in
+                        const username = email.split('@')[0];
+                        await set(userRef, {
+                            username: username,
+                            email: email,
+                            createdAt: new Date().toISOString(),
+                            friends: {},
+                            posts: {},
+                            authMethod: 'emailLink'
+                        });
+                    }
+                    
+                    showSuccess('Email verified! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1000);
+                })
+                .catch((error) => {
+                    console.error('Email link sign-in error:', error);
+                    showError('Email link sign-in failed. Please try again.');
+                });
+        }
     </script>
 </body>
 </html>
