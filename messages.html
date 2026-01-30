@@ -248,6 +248,178 @@
             background: var(--accent-purple);
             border-radius: 10px;
         }
+
+        .create-group-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .create-group-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(123, 63, 242, 0.4);
+        }
+
+        .group-badge {
+            background: var(--accent-purple);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(42, 42, 50, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal h2 {
+            font-family: 'Syne', sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-light);
+        }
+
+        .form-group-modal {
+            margin-bottom: 20px;
+        }
+
+        .form-group-modal label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group-modal input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 30, 36, 0.6);
+            border: 1px solid rgba(123, 63, 242, 0.3);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-group-modal input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        .friends-checklist {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(123, 63, 242, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .friend-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .friend-checkbox:hover {
+            background: rgba(123, 63, 242, 0.1);
+        }
+
+        .friend-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .friend-checkbox-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .create-group-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #a855f7 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .create-group-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(123, 63, 242, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -269,7 +441,12 @@
     <div class="messages-container">
         <!-- Conversations List -->
         <div class="conversations-list">
-            <h2>Messages</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Messages</h2>
+                <button class="create-group-btn" id="createGroupBtn" title="Create Group Chat">
+                    <span style="font-size: 20px;">➕</span>
+                </button>
+            </div>
             <div id="conversationsList">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -286,6 +463,28 @@
                     <p>Choose a friend to start messaging</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div class="modal-overlay" id="groupModal">
+        <div class="modal">
+            <span class="modal-close" onclick="closeGroupModal()">×</span>
+            <h2>Create Group Chat</h2>
+            <div class="form-group-modal">
+                <label for="groupName">Group Name</label>
+                <input type="text" id="groupName" placeholder="Enter group name" maxlength="50">
+            </div>
+            <div class="form-group-modal">
+                <label>Select Friends (at least 2)</label>
+                <div class="friends-checklist" id="friendsChecklist">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading friends...</p>
+                    </div>
+                </div>
+            </div>
+            <button class="create-group-submit" id="createGroupSubmit">Create Group</button>
         </div>
     </div>
 
@@ -484,6 +683,330 @@
             await set(newMessageRef, {
                 senderId: currentUser.uid,
                 receiverId: activeChat,
+                text: messageText,
+                timestamp: Date.now()
+            });
+            
+            messageInput.value = '';
+        }
+
+        // Group Chat Functionality
+        window.closeGroupModal = function() {
+            document.getElementById('groupModal').classList.remove('active');
+        };
+
+        document.getElementById('createGroupBtn').addEventListener('click', function() {
+            document.getElementById('groupModal').classList.add('active');
+            loadFriendsForGroup();
+        });
+
+        async function loadFriendsForGroup() {
+            const friendsChecklist = document.getElementById('friendsChecklist');
+            const friends = currentUserData.friends || {};
+            const friendIds = Object.keys(friends);
+            
+            if (friendIds.length === 0) {
+                friendsChecklist.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No friends to add. Add friends first!</p>';
+                return;
+            }
+            
+            const friendsData = await Promise.all(friendIds.map(async (friendId) => {
+                const friendRef = ref(database, 'users/' + friendId);
+                const snapshot = await get(friendRef);
+                return snapshot.exists() ? { uid: friendId, ...snapshot.val() } : null;
+            }));
+            
+            const validFriends = friendsData.filter(f => f !== null);
+            
+            friendsChecklist.innerHTML = validFriends.map(friend => {
+                const avatar = friend.username.charAt(0).toUpperCase();
+                return `
+                    <label class="friend-checkbox">
+                        <input type="checkbox" value="${friend.uid}" class="group-member-checkbox">
+                        <div class="friend-checkbox-avatar">${avatar}</div>
+                        <span>${friend.username}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('createGroupSubmit').addEventListener('click', async function() {
+            const groupName = document.getElementById('groupName').value.trim();
+            const selectedFriends = Array.from(document.querySelectorAll('.group-member-checkbox:checked')).map(cb => cb.value);
+            
+            if (!groupName) {
+                alert('Please enter a group name');
+                return;
+            }
+            
+            if (selectedFriends.length < 2) {
+                alert('Please select at least 2 friends for a group chat');
+                return;
+            }
+            
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+            
+            try {
+                // Create group in database
+                const groupsRef = ref(database, 'groups');
+                const newGroupRef = push(groupsRef);
+                
+                const members = {};
+                members[currentUser.uid] = true;
+                selectedFriends.forEach(friendId => {
+                    members[friendId] = true;
+                });
+                
+                await set(newGroupRef, {
+                    name: groupName,
+                    createdBy: currentUser.uid,
+                    createdAt: Date.now(),
+                    members: members,
+                    messages: {}
+                });
+                
+                // Add group to each member's groups
+                for (const memberId of Object.keys(members)) {
+                    const userGroupRef = ref(database, `users/${memberId}/groups/${newGroupRef.key}`);
+                    await set(userGroupRef, true);
+                }
+                
+                closeGroupModal();
+                document.getElementById('groupName').value = '';
+                document.querySelectorAll('.group-member-checkbox').forEach(cb => cb.checked = false);
+                
+                // Reload conversations to show new group
+                await loadUserData();
+                loadConversations();
+                
+                // Open the new group
+                openGroupChat(newGroupRef.key);
+                
+            } catch (error) {
+                console.error('Error creating group:', error);
+                alert('Failed to create group. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Group';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('groupModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGroupModal();
+            }
+        });
+
+        // Update loadConversations to include groups
+        function loadConversations() {
+            const conversationsList = document.getElementById('conversationsList');
+            const friends = currentUserData.friends || {};
+            const groups = currentUserData.groups || {};
+            const friendIds = Object.keys(friends);
+            const groupIds = Object.keys(groups);
+            
+            if (friendIds.length === 0 && groupIds.length === 0) {
+                conversationsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);"><p>No conversations</p><p style="font-size: 13px; margin-top: 10px;">Add friends or create a group!</p></div>';
+                return;
+            }
+            
+            let conversationsHTML = '';
+            
+            // Load individual chats
+            Promise.all(friendIds.map(async (friendId) => {
+                const friendRef = ref(database, 'users/' + friendId);
+                const snapshot = await get(friendRef);
+                if (!snapshot.exists()) return null;
+                
+                const friendData = snapshot.val();
+                const convKey = getConversationKey(currentUser.uid, friendId);
+                const messagesRef = ref(database, 'conversations/' + convKey);
+                const messagesSnapshot = await get(messagesRef);
+                
+                let lastMessage = 'Start a conversation';
+                if (messagesSnapshot.exists()) {
+                    const messages = Object.values(messagesSnapshot.val());
+                    const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+                    if (sorted[0]) {
+                        lastMessage = sorted[0].text;
+                    }
+                }
+                
+                return {
+                    type: 'direct',
+                    id: friendId,
+                    username: friendData.username,
+                    lastMessage: lastMessage
+                };
+            })).then(async directChats => {
+                // Load group chats
+                const groupChats = await Promise.all(groupIds.map(async (groupId) => {
+                    const groupRef = ref(database, 'groups/' + groupId);
+                    const snapshot = await get(groupRef);
+                    if (!snapshot.exists()) return null;
+                    
+                    const groupData = snapshot.val();
+                    let lastMessage = 'No messages yet';
+                    
+                    if (groupData.messages) {
+                        const messages = Object.values(groupData.messages);
+                        const sorted = messages.sort((a, b) => b.timestamp - a.timestamp);
+                        if (sorted[0]) {
+                            lastMessage = sorted[0].text;
+                        }
+                    }
+                    
+                    return {
+                        type: 'group',
+                        id: groupId,
+                        name: groupData.name,
+                        memberCount: Object.keys(groupData.members).length,
+                        lastMessage: lastMessage
+                    };
+                }));
+                
+                const allConversations = [...directChats.filter(c => c !== null), ...groupChats.filter(c => c !== null)];
+                
+                conversationsList.innerHTML = allConversations.map(conv => {
+                    if (conv.type === 'direct') {
+                        const avatar = conv.username.charAt(0).toUpperCase();
+                        const isActive = activeChat === conv.id && !activeGroup;
+                        
+                        return `
+                            <div class="conversation-item ${isActive ? 'active' : ''}" onclick="window.openChat('${conv.id}')">
+                                <div class="conversation-avatar">${avatar}</div>
+                                <div class="conversation-info">
+                                    <div class="conversation-name">${conv.username}</div>
+                                    <div class="conversation-preview">${conv.lastMessage.substring(0, 30)}${conv.lastMessage.length > 30 ? '...' : ''}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        const avatar = conv.name.charAt(0).toUpperCase();
+                        const isActive = activeGroup === conv.id;
+                        
+                        return `
+                            <div class="conversation-item ${isActive ? 'active' : ''}" onclick="window.openGroupChat('${conv.id}')">
+                                <div class="conversation-avatar">${avatar}</div>
+                                <div class="conversation-info">
+                                    <div class="conversation-name">
+                                        ${conv.name}
+                                        <span class="group-badge">GROUP</span>
+                                    </div>
+                                    <div class="conversation-preview">${conv.memberCount} members • ${conv.lastMessage.substring(0, 20)}${conv.lastMessage.length > 20 ? '...' : ''}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            });
+        }
+
+        // Group chat variables
+        let activeGroup = null;
+
+        window.openGroupChat = async function(groupId) {
+            activeGroup = groupId;
+            activeChat = null;
+            
+            const groupRef = ref(database, 'groups/' + groupId);
+            const snapshot = await get(groupRef);
+            if (!snapshot.exists()) return;
+            
+            const groupData = snapshot.val();
+            const memberCount = Object.keys(groupData.members).length;
+            const avatar = groupData.name.charAt(0).toUpperCase();
+            const chatArea = document.getElementById('chatArea');
+            
+            chatArea.innerHTML = `
+                <div class="chat-header">
+                    <div class="chat-header-avatar">${avatar}</div>
+                    <div class="chat-header-info">
+                        <h3>${groupData.name} <span class="group-badge">GROUP</span></h3>
+                        <p>${memberCount} members</p>
+                    </div>
+                </div>
+                <div class="messages-area" id="messagesArea"></div>
+                <div class="message-input-area">
+                    <input type="text" id="messageInput" placeholder="Type a message...">
+                    <button class="send-btn" id="sendBtn">Send</button>
+                </div>
+            `;
+            
+            loadConversations();
+            loadGroupMessages(groupId);
+            
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendGroupMessage();
+            });
+            
+            document.getElementById('sendBtn').addEventListener('click', sendGroupMessage);
+            document.getElementById('messageInput').focus();
+        };
+
+        function loadGroupMessages(groupId) {
+            const messagesRef = ref(database, `groups/${groupId}/messages`);
+            
+            onValue(messagesRef, async (snapshot) => {
+                const messagesArea = document.getElementById('messagesArea');
+                
+                if (!snapshot.exists()) {
+                    messagesArea.innerHTML = '<div style="text-align: center; color: var(--text-muted); margin: auto;"><p>No messages yet</p><p style="font-size: 13px; margin-top: 10px;">Start the conversation!</p></div>';
+                    return;
+                }
+                
+                const messages = Object.values(snapshot.val());
+                messages.sort((a, b) => a.timestamp - b.timestamp);
+                
+                // Get sender names
+                const senderNames = {};
+                for (const msg of messages) {
+                    if (!senderNames[msg.senderId]) {
+                        const userRef = ref(database, 'users/' + msg.senderId);
+                        const userSnap = await get(userRef);
+                        if (userSnap.exists()) {
+                            senderNames[msg.senderId] = userSnap.val().username;
+                        }
+                    }
+                }
+                
+                messagesArea.innerHTML = messages.map(msg => {
+                    const isSent = msg.senderId === currentUser.uid;
+                    const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    const senderName = senderNames[msg.senderId] || 'Unknown';
+                    
+                    return `
+                        <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+                            ${!isSent ? `<div style="font-size: 11px; font-weight: 600; margin-bottom: 3px; opacity: 0.8;">${senderName}</div>` : ''}
+                            <div class="message-text">${msg.text}</div>
+                            <div class="message-time">${time}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            });
+        }
+
+        async function sendGroupMessage() {
+            if (!activeGroup) return;
+            
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) return;
+            
+            const messagesRef = ref(database, `groups/${activeGroup}/messages`);
+            const newMessageRef = push(messagesRef);
+            
+            await set(newMessageRef, {
+                senderId: currentUser.uid,
                 text: messageText,
                 timestamp: Date.now()
             });
